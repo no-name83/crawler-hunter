@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 if (!class_exists('WP_List_Table')) {
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 }
-
+if ( ! class_exists( 'Ip_Table' ) ) {
 
 class Ip_Table extends WP_List_Table
 {
@@ -129,6 +129,7 @@ class Ip_Table extends WP_List_Table
             'total_pages' => ceil($total_items / $per_page) 
         ));
     }
+}
 }
 //global $wpdb;
 

@@ -1,6 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
-
+if ( ! function_exists( 'crawlers_ip_monitor' ) ) {
 function crawlers_ip_monitor(){
 require_once __DIR__ . '/crw_function.php';
 require_once __DIR__ . '/crw_ip_table.php';
@@ -44,7 +44,7 @@ require_once __DIR__ . '/crw_ip_table.php';
     <div class="icon32 icon32-posts-post" id="icon-edit"><br></div>
 
     <form id="persons-table" method="GET">
-        <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>"/>
+        <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']) ?>"/>
         <?php 
 
 
@@ -141,6 +141,7 @@ FROM
  
 }
   }
+}
 
 add_action( 'wp_enqueue_scripts', 'crw_datatables_script1_js', 10 );
 

@@ -87,7 +87,7 @@ Add Bot Name To Whitelist</h1><br>
     <div class="icon32 icon32-posts-post" id="icon-edit"><br></div>
 
     <form id="persons-table" method="GET">
-        <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>"/>
+        <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']) ?>"/>
         <?php $table->display() ?>
     </form>
 
@@ -162,6 +162,9 @@ FROM
 
     <?php
   }
+
+
+  if ( ! function_exists( 'crw_manuel_adding' ) ) {
 function crw_manuel_adding(){
 
  $crw_all_func = new   crw_all_func; 
@@ -216,6 +219,10 @@ function crw_manuel_adding(){
 
 
 }
+
+}
+
+if ( ! function_exists( 'crw_auto_detectet_bot' ) ) {
 function crw_auto_detectet_bot(){
 
 
@@ -319,7 +326,7 @@ $crw_all_func->crawler_ip_check($get_crawler_ip_new);
 
 }
 
-
+}
 
 
 
