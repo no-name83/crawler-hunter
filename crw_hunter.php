@@ -47,7 +47,7 @@ add_submenu_page('crawler-hunter-admin-menu', __('crawler-hunter-ip','menu-test'
 <?php
 
 
-    $table = new crwbottable();
+    $table = new crw_bot_table();
     $table->prepare_items();
 
 

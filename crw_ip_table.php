@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 if (!class_exists('WP_List_Table')) {
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 }
-if ( ! class_exists( 'crwiptable' ) ) {
+if ( ! class_exists( 'crw_ip_table' ) ) {
 
-class crwiptable extends WP_List_Table
+class crw_ip_table extends WP_List_Table
 {
   
     function __construct()

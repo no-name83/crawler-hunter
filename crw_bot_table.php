@@ -8,9 +8,9 @@ if (!class_exists('WP_List_Table')) {
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 }
 
-if ( ! class_exists( 'crwbottable' ) ) {
+if ( ! class_exists( 'crw_bot_table' ) ) {
 
-class crwbottable extends WP_List_Table
+class crw_bot_table extends WP_List_Table
 {
   
     function __construct()
