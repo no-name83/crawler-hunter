@@ -10,7 +10,7 @@ if (!class_exists('WP_List_Table')) {
 
 if ( ! class_exists( 'Bot_Table' ) ) {
 
-class Bot_Table extends WP_List_Table
+class crwbottable extends WP_List_Table
 {
   
     function __construct()

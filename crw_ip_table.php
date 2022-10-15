@@ -6,7 +6,7 @@ if (!class_exists('WP_List_Table')) {
 }
 if ( ! class_exists( 'Ip_Table' ) ) {
 
-class Ip_Table extends WP_List_Table
+class crwiptable extends WP_List_Table
 {
   
     function __construct()

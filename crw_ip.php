@@ -48,7 +48,7 @@ require_once __DIR__ . '/crw_ip_table.php';
         <?php 
 
 
-              $table = new Ip_Table();
+              $table = new crwiptable();
     $table->prepare_items();
 
         $table->display() ?>
