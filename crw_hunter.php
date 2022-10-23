@@ -100,14 +100,14 @@ Add Bot Name To Whitelist</h1><br>
 <?php
 
 global $wpdb;
-      
+   $table_name = $wpdb->prefix . 'crawler_hunter';    
 
        
         $qry="SELECT 
     *
     
 FROM 
-    wp_crawler_hunter WHERE list_status=1
+    $table_name WHERE list_status=1
 ";
         $result=$wpdb->get_results($qry, object);
         //print_r($result);

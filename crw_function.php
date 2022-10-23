@@ -265,7 +265,7 @@ $banned_total_time;
       # code...
       global $wpdb;
        $crw_table_name=$wpdb->prefix."crawler_hunter_ip";
-            $key->total_access;  
+           // $key->total_access;  
           $crw_total=$key->total_access; 
            $crw_banned_end_time=$key->banned_end_time ;
         $crw_banned_total_time=$key->banned_total_time;
@@ -273,11 +273,14 @@ $banned_total_time;
     }
     $crw_banned_total_time=$crw_banned_total_time;
     
-       $crw_i=$crw_total+1;
-   
+      $crw_i=$crw_total+1;
+
+    //$crw_i=$crw_total;
+  
             if ($crw_hnt_opt==1) {
   # code...
-   $wpdb->update( $crw_table_name, array( 'total_access' =>$crw_i ,'banned_start_time'=>$crw_banned_start_time ),array('ip'=>$get_crawler_ip_new));
+             
+  $wpdb->update( $crw_table_name, array( 'total_access' =>$crw_i ,'banned_start_time'=>$crw_banned_start_time ),array('ip'=>$get_crawler_ip_new));
 
 
 

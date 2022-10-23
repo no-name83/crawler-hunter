@@ -93,7 +93,24 @@ class crw_bot_table extends WP_List_Table
 
             if (!empty($ids)) {
                // $wpdb->query("DELETE FROM $table_name WHERE id IN($ids)");
-                $wpdb->query("UPDATE $table_name SET list_status=1  WHERE id IN($ids)");
+               // $wpdb->query("UPDATE $table_name SET list_status=1  WHERE id IN($ids)");
+               /* $rows_affected = $wpdb->query(
+    $wpdb->prepare("
+        UPDATE $table_name
+        SET  list_status = %s, id = %d
+        WHERE id = $ids",
+        '1',$ids
+    )
+);*/
+
+    $result = $wpdb->update(
+                        $table_name,
+                        array(
+                            'list_status' =>               '1'
+                                                                   ,
+                        ),
+                        array( 'id' => sanitize_text_field( $ids ) )
+                    );
             }
         }
     }
@@ -110,26 +127,62 @@ class crw_bot_table extends WP_List_Table
         $hidden = array();
         $sortable = $this->get_sortable_columns();
 
-        $this->_column_headers = array($columns, $hidden, $sortable);
-
-        
+        $columns               = $this->get_columns();
+        $hidden                = array();
+        $sortable              = $this->get_sortable_columns();
+        $this->_column_headers = array(
+            $columns,
+            $hidden,
+            $sortable,
+        );
         $this->process_bulk_action();
+        
+        if ( isset( $_GET['order'] ) ) {
+            $order = sanitize_text_field( $_GET['order'] );
+        } else {
+            $order = 'asc';
+        }
+        if ( isset( $_GET['orderby'] ) ) {
+            $orderby = sanitize_text_field( $_GET['orderby'] );
+        } else {
+            $orderby = 'bot_name';
+        }
 
-        $total_items = $wpdb->get_var("SELECT COUNT(id) FROM $table_name WHERE list_status=0" );
+      
+         $order   = sanitize_sql_orderby( $order );
+         $orderby = str_replace( ' ', '', $orderby );
 
         
-        $paged = isset($_REQUEST['paged']) ? max(0, intval($_REQUEST['paged'] - 1) * $per_page) : 0;
-        $orderby = (isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : 'access_time';
-        $order = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc'))) ? $_REQUEST['order'] : 'desc';
 
-       
-        $this->items = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE list_status=0 ORDER BY $orderby $order LIMIT %d OFFSET %d", $per_page, $paged), ARRAY_A);
+          
 
-        $this->set_pagination_args(array(
-            'total_items' => $total_items, 
-            'per_page' => $per_page, 
-            'total_pages' => ceil($total_items / $per_page) 
-        ));
+          
+
+          
+
+                    $results = $wpdb->get_results(
+                "SELECT * FROM `$table_name` WHERE list_status=0  order by " . $orderby .
+                ' ' . $order
+            );
+
+      
+
+        $data = array();
+        
+        foreach ( $results as $crw_query ) {
+            array_push( $data, (array) $crw_query );
+        }
+        $current_page = $this->get_pagenum();
+        $total_items  = count( $data );
+        $data         = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
+        $this->items  = $data;
+        $this->set_pagination_args(
+            array(
+                'total_items' => $total_items, 
+                'per_page'    => $per_page, 
+                'total_pages' => ceil( $total_items / $per_page ), 
+            )
+        );
     }
 }
 

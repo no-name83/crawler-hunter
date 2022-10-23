@@ -59,13 +59,14 @@ require_once __DIR__ . '/crw_ip_table.php';
 <?php
 
 global $wpdb;
+$table_name = $wpdb->prefix . 'crawler_hunter_ip'; 
       
 
         $qry="SELECT 
    *
   
 FROM
-    wp_crawler_hunter_ip WHERE list_status=1 AND total_access >=5
+    $table_name WHERE list_status=1 AND total_access >=5
 ";
         $result=$wpdb->get_results($qry, object);
         //print_r($result);
