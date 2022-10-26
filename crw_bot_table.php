@@ -18,8 +18,8 @@ class crw_bot_table extends WP_List_Table
         global $status, $page;
 
         parent::__construct(array(
-            'singular' => 'bot_name',
-            'plural' => 'bot_name',
+            'singular' => 'botname', 
+                'plural'   => 'botnames',
         ));
     }
 
@@ -46,9 +46,12 @@ class crw_bot_table extends WP_List_Table
     function column_cb($item)
     {
         return sprintf(
-            '<input type="checkbox" name="id[]" value="%s" />',
-            $item['id']
+            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
+            $this->
+            _args['singular'], 
+            $item['id'] 
         );
+    
     }
 
 
@@ -85,32 +88,25 @@ class crw_bot_table extends WP_List_Table
     function process_bulk_action()
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'crawler_hunter'; // do not forget about tables prefix
+       $table_name = $wpdb->prefix . 'crawler_hunter'; 
 
-        if ('delete' === $this->current_action()) {
-            $ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
-            if (is_array($ids)) $ids = implode(',', $ids);
-
-            if (!empty($ids)) {
-               // $wpdb->query("DELETE FROM $table_name WHERE id IN($ids)");
-               // $wpdb->query("UPDATE $table_name SET list_status=1  WHERE id IN($ids)");
-               /* $rows_affected = $wpdb->query(
-    $wpdb->prepare("
-        UPDATE $table_name
-        SET  list_status = %s, id = %d
-        WHERE id = $ids",
-        '1',$ids
-    )
-);*/
-
-    $result = $wpdb->update(
+        if ( 'delete' === $this->current_action() ) {
+            if ( isset( $_GET['botname'] ) ) {
+                $crw_i = 0;
+                foreach ( $_GET['botname'] as $bot_id ) {
+                    $crw_i++;
+                    $result = $wpdb->update(
                         $table_name,
                         array(
-                            'list_status' =>               '1'
-                                                                   ,
+                            'list_status' =>              '1',
+                                                              
                         ),
-                        array( 'id' => sanitize_text_field( $ids ) )
+                        array( 'id' => sanitize_text_field( $bot_id ) )
                     );
+                 
+                    
+                }
+              
             }
         }
     }

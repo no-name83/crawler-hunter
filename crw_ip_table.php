@@ -40,9 +40,11 @@ class crw_ip_table extends WP_List_Table
   
     function column_cb($item)
     {
-        return sprintf(
-            '<input type="checkbox" name="id[]" value="%s" />',
-            $item['id']
+       return sprintf(
+            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
+            $this->
+            _args['singular'], 
+            $item['id'] 
         );
     }
 
@@ -82,23 +84,26 @@ class crw_ip_table extends WP_List_Table
     function process_bulk_action()
     {
         global $wpdb;
+        $id;
         $table_name = $wpdb->prefix . 'crawler_hunter_ip'; 
 
-        if ('delete' === $this->current_action()) {
-            $ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
-            if (is_array($ids)) $ids = implode(',', $ids);
-
-            if (!empty($ids)) {
-               // $wpdb->query("UPDATE $table_name SET list_status=0  WHERE id IN($ids)");
-
-    $result = $wpdb->update(
+           if ( 'delete' === $this->current_action() ) {
+            if ( isset( $_GET['ip'] ) ) {
+                $crw_i = 0;
+                foreach ( $_GET['ip'] as $ip_id ) {
+                    $crw_i++;
+                    $result = $wpdb->update(
                         $table_name,
                         array(
-                            'list_status' =>               '0'
-                                                                   ,
+                            'list_status' =>              '0',
+                                                              
                         ),
-                        array( 'id' => sanitize_text_field( $ids ) )
+                        array( 'id' => sanitize_text_field( $ip_id ) )
                     );
+                 
+                    
+                }
+              
             }
         }
     }
