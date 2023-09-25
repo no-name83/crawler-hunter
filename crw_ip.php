@@ -37,7 +37,7 @@ require_once __DIR__ . '/crw_ip_table.php';
                          ?>
 
 <input type="checkbox" name="crw_ip_box" value="1"<?php checked(  get_option( 'crwopt' ) ); ?> /> <input type="submit" name="crw_opt_status" class="" value="Save"> <br>
-<input type="submit" name="crw_add" class="button button-primary" value="Add  Ip">
+<input type="submit" name="crw_add_ip" class="button button-primary" value="Add  Ip">
 </form>
 <div class="wrap">
 

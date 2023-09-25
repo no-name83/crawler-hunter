@@ -1,13 +1,13 @@
 <?php
 /**
 Plugin Name: crawler-hunter
-Tags: bad bots,block,ban,control bots,spiders,ip,crawlers,anti spam
+Tags: bad bots,block,ban,control bots,spiders,security
 Requires at least: 3.6
 Description:Bots and web crawlers coming to your site check the content of the Full user agent string and block the ones other than the white list.
-Tested up to: 6.0.2
+Tested up to: 6.2.2
 Requires PHP: 5.6
-Version: 1.0
-Stable tag: 1.0
+Version: 1.1
+Stable tag: 1.1
 License: GPL2
 **/
 require_once __DIR__ . '/crw_function.php';
@@ -193,7 +193,9 @@ function crw_manuel_adding(){
   }
 
 
-    if (isset($_POST['crw_add'] ) &&   $crw_ip_addr=$_POST['ip_addr'] && wp_verify_nonce($_POST['_wpnonce'], 'crwhunter-nonce')) {
+
+
+   else if (isset($_POST['crw_add_ip'] ) &&   $crw_ip_addr=$_POST['ip_addr']     && wp_verify_nonce($_POST['_wpnonce'], 'crwhunter-nonce')) {
    
       //$crw_ip_addr=$_POST['ip_addr'];
       $crw_ip_addr_new=sanitize_text_field($crw_ip_addr=$_POST['ip_addr']);
@@ -376,11 +378,14 @@ add_action( 'wp_enqueue_scripts', 'crw_datatables_script_js', 10 );
   
 
   
+ $crw_all_func =new   crw_all_func;
  
- 
-  register_activation_hook( __FILE__, 'crw_all_func::crw_create_db' );
+ // register_activation_hook( __FILE__, 'crw_all_func::crw_create_db' );
+   register_activation_hook( __FILE__, array($crw_all_func, 'crw_create_db') );
+   register_deactivation_hook(__FILE__, array($crw_all_func, 'crw_delete_records'));
   
-    register_uninstall_hook(__FILE__, 'crw_all_func::crw_delete_db');
+    
+
 
 
 

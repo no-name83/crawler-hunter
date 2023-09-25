@@ -75,10 +75,20 @@ function crw_create_db()
     $crw_opt=update_option('crwopt','0');
    }
 }
-function crw_delete_db(){
+
+
+function crw_delete_records(){
 
 global $wpdb;
-    $crw_table_name = $wpdb->prefix . 'crawler_hunter';
+$crw_table_name = $wpdb->prefix . 'crawler_hunter';
+$crw_sql="DELETE FROM `wp_crawler_hunter` WHERE bot_name IN ('google','bing','facebook','yahoo','twitter')";
+ $wpdb->query($crw_sql);
+
+
+ //after delete records drop tables
+
+
+  $crw_table_name = $wpdb->prefix . 'crawler_hunter';
     $crw_sql = "DROP TABLE IF EXISTS $crw_table_name";
     $wpdb->query($crw_sql);
 
@@ -89,8 +99,7 @@ global $wpdb;
 
    $crw_opt_delete=delete_option('crwopt');
 
-///////////////////
-  
+
 }
 
 
