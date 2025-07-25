@@ -9,19 +9,58 @@ require_once __DIR__ . '/crw_ip_table.php';
 ###ad ip 
 
 
+
+
+
   $crw_all_func = new   crw_all_func; 
+  $crw_totalban_count_new="";
+  $crw_startban_time_new="";
+  $crw_banexpire_time_new="";
 
 
     if (isset($_POST['crw_add'] ) &&   $crw_ip_addr=$_POST['ip_addr'] && wp_verify_nonce($_POST['_wpnonce'], 'crwhunter-nonce')) {
    
-      //$crw_ip_addr=$_POST['ip_addr'];
-      //$crw_ip_addr_new=wp_filter_nohtml_kses($crw_ip_addr=$_POST['ip_addr']);
+      
       $crw_ip_addr_new=sanitize_text_field($crw_ip_addr=$_POST['ip_addr']);
 
 
      $crw_all_func->crw_manuel_add_ip($crw_ip_addr_new);
 
 
+
+
+}
+
+  $crw_hnt_opt=get_option( 'crwopt' );
+ 
+     if (isset($_POST['crw_ip_box']) && $_SERVER['REQUEST_METHOD'] === 'POST' && wp_verify_nonce($_POST['_wpnonce'], 'crwhunter-nonce')) {
+  # code...
+      $crw_totalban_count_new=intval($_POST['crw_totalban_count']);
+      $crw_startban_time_new=intval($_POST['crw_startban_time']);
+      $crw_banexpire_time_new=intval($_POST['crw_banexpire_time']);
+
+   $crw_all_func->crw_limit_ip($crw_totalban_count_new,$crw_startban_time_new,$crw_banexpire_time_new);
+}
+
+else if(!isset($_POST['crw_ip_box']) && $_SERVER['REQUEST_METHOD'] === 'POST' && wp_verify_nonce($_POST['_wpnonce'], 'crwhunter-nonce')){
+	 $crw_totalban_count_new=intval($_POST['crw_totalban_count']);
+      $crw_startban_time_new=intval($_POST['crw_startban_time']);
+      $crw_banexpire_time_new=intval($_POST['crw_banexpire_time']);
+  
+   $crw_totalban_count_new=intval($_POST['crw_totalban_count']);
+
+
+
+   $crw_all_func->crw_unlimit_ip($crw_totalban_count_new,$crw_startban_time_new,$crw_banexpire_time_new);
+  
+}
+
+if (isset($_POST["crw_ip_logs"]) && wp_verify_nonce($_POST['_wpnonce'], 'crwhunter-nonce')) {
+	# code...
+  
+  $crw_ip_logs_new=sanitize_text_field($_POST["crw_ip_logs_delete"]);
+	
+	$crw_all_func->crw_delete_old_ip_logs($crw_ip_logs_new);
 }
 ?>
 
@@ -30,13 +69,16 @@ require_once __DIR__ . '/crw_ip_table.php';
 <h1>Add Ip   To Blacklist</h1>
 <input type="text" id="ip_addr" name="ip_addr">
                     <h3>BLACKLISTED</h3>
-                    <b>IP addresses that do it more than 5 times in 1 minute are blocked for 4 hours</b>
+                    <b>IP addresses that make more than  <input type="text" id="pin" name="crw_totalban_count" maxlength="20"  value ="<?php if(get_option( 'crwopt' )==1) echo get_option("crw_totalban_count"); ?>" size="1">  times requests in <input type="text" id="pin" name="crw_startban_time" maxlength="4" value="<?php if(get_option( 'crwopt' )==1) echo get_option("crw_startban_time"); ?>" size="1"> minutes will be blocked for   <input type="text" id="pin" name="crw_banexpire_time" maxlength="4" value="<?php if(get_option( 'crwopt' )==1) echo get_option("crw_banexpire_time"); ?>" size="1">minutes &nbsp;
                         <?php $crw_hnt_opt = get_option( 'crwopt','');
 
                          
                          ?>
 
-<input type="checkbox" name="crw_ip_box" value="1"<?php checked(  get_option( 'crwopt' ) ); ?> /> <input type="submit" name="crw_opt_status" class="" value="Save"> <br>
+<input type="checkbox" name="crw_ip_box" value="1"<?php checked(  get_option( 'crwopt' ) ); ?> /> <input type="submit" name="crw_opt_status" class="button button-primary" value="Save"> <br>
+<hr>
+sdadad </br>
+<hr>
 <input type="submit" name="crw_add_ip" class="button button-primary" value="Add  Ip">
 </form>
 <div class="wrap">
@@ -47,7 +89,7 @@ require_once __DIR__ . '/crw_ip_table.php';
         <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']) ?>"/>
         <?php 
 
-
+              $crw_delete_ip_logs=get_option('crw_delete_ip_logs');
               $table = new crw_ip_table();
     $table->prepare_items();
 
@@ -105,6 +147,45 @@ FROM
   </table>
 </div>';
 
+echo "Delete Ip Logs Before:";
+echo '<select name="crw_ip_logs_delete" style="width:150px;">';
+if ($crw_delete_ip_logs==0) {
+	# code...
+	echo' <option value="0" selected> Never </option>
+  <option value="3">3 Days</option>
+  <option value="7">7 Days</option>
+  <option value="30">30 Days</option>';
+}
+else if ($crw_delete_ip_logs==3) {
+	# code...
+	echo' <option value="0"> Never </option>
+  <option value="3" selected>3 Days</option>
+  <option value="7">7 Days</option>
+  <option value="30">30 Days</option>';
+}
+else if ($crw_delete_ip_logs==7) {
+	# code...
+	echo' <option value="0"> Never </option>
+  <option value="3">3 Days</option>
+  <option value="7" selected>7 Days</option>
+  <option value="30">30 Days</option>';
+}
+else if ($crw_delete_ip_logs==30) {
+	# code...
+	echo' <option value="0"> Never </option>
+  <option value="3">3 Days</option>
+  <option value="7">7 Days</option>
+  <option value="30" selected>30 Days</option>';
+}
+echo "</select>";
+
+
+echo '<input type="submit" name="crw_ip_logs" class="button button-primary" value="Save">';
+
+
+
+
+
 
 ?>
 
@@ -120,27 +201,7 @@ FROM
 
 
     <?php
-    if (isset($_POST['crw_opt_status'])) {
-  # code...
-
-  $crw_hnt_opt=get_option( 'crwopt' );
-
-   if ($crw_hnt_opt==0) {
-     # code...
-     
-      $crw_hnt_opt=update_option('crwopt','1');
-      echo '<meta http-equiv="refresh" content="1">';
-   }
-   else if ($crw_hnt_opt==1) {
-     # code...
-    $crw_hnt_opt=update_option('crwopt','0');
-    echo '<meta http-equiv="refresh" content="1">';
-   }
   
-
- 
- 
-}
   }
 }
 
@@ -166,5 +227,14 @@ add_action( 'wp_enqueue_scripts', 'crw_datatables_script1_js', 10 );
   </script> 
 <?php   
   }
+
+
+ 
+
+ $crw_all_func = new   crw_all_func; 
+
+ add_action('init', array($crw_all_func,'crw_custom_cron_job'));
+
+ add_action( 'crw_delete_old_records_update', array($crw_all_func, 'crw_delete_old_records'));
 
 ?>

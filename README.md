@@ -7,7 +7,7 @@ Requires PHP: 5.6
 Stable tag: 1.0
 License: GPL2
 
-It is a simple but effective plugin. Stops spam bots by checking browser content.
+It is a simple but effective wordpress plugin. Stops spam bots by checking browser content.
 You can also add an ip address to the blacklist.
 
 == Description ==

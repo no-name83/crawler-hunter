@@ -8,7 +8,7 @@ function crw_create_db()
 {
     global $wpdb;
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    // creates my_table in database if not exists
+    // creates crawler_hunter in database if not exists
    $crw_table = $wpdb->prefix . "crawler_hunter";
     $charset_collate = $wpdb->get_charset_collate();
     $crw_sql = "CREATE TABLE IF NOT EXISTS $crw_table (
@@ -20,7 +20,7 @@ function crw_create_db()
     UNIQUE (`id`)
     
     ) $charset_collate;";
-    // KEY `botnickname` (`botnickname`)
+    
    dbDelta($crw_sql);
 
 /////////
@@ -42,7 +42,7 @@ function crw_create_db()
      UNIQUE (`id`)
     
     ) $charset_collate;";
-    // KEY `botnickname` (`botnickname`)
+    
    dbDelta($crw_sql);
    
 
@@ -73,6 +73,10 @@ function crw_create_db()
     
 
     $crw_opt=update_option('crwopt','0');
+    $crw_totalban_count=update_option('crw_totalban_count','5');
+    $crw_startban_time = update_option('crw_startban_time','1');
+    $crw_banexpire_time =update_option('crw_banexpire_time','240');
+    $crw_ip_logs_delete = update_option('crw_ip_logs_delete','0');
    }
 }
 
@@ -98,6 +102,12 @@ $crw_sql="DELETE FROM `wp_crawler_hunter` WHERE bot_name IN ('google','bing','fa
     $wpdb->query($crw_sql);
 
    $crw_opt_delete=delete_option('crwopt');
+   $crw_totalban_count=delete_option('crw_totalban_count','5');
+   $crw_startban_time = delete_option('crw_startban_time','1');
+   $crw_banexpire_time =delete_option('crw_banexpire_time','240');
+   $crw_ip_logs_delete = delete_option('crw_ip_logs_delete','0');
+
+   wp_clear_scheduled_hook( 'crw_delete_old_records_update' );
 
 
 }
@@ -174,6 +184,83 @@ $wpdb->insert( $crw_table_name, array('ip'=>$crw_ip_addr_new, 'list_status'=> '2
 }
 }
 
+function crw_custom_cron_job() {
+    if (!wp_next_scheduled('crw_delete_old_records_update')) {
+      
+      wp_schedule_event( time(), 'hourly', 'crw_delete_old_records_update' );
+      
+    }
+}
+
+function crw_delete_old_records() {
+    global $wpdb;
+
+    $crw_ip_logs_new=get_option('crw_delete_ip_logs');
+    
+    
+    $table_name = $wpdb->prefix . 'crawler_hunter_ip'; 
+   
+    $date_to_delete = date('Y-m-d', strtotime('-'.''.$crw_ip_logs_new.''.' days')); 
+    
+    $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE banned_total_time < %s", $date_to_delete));
+}
+
+function crw_delete_old_ip_logs($crw_ip_logs_new){
+
+
+update_option('crw_delete_ip_logs',$crw_ip_logs_new);
+
+
+}
+
+function crw_limit_ip($crw_totalban_count_new,$crw_startban_time_new,$crw_banexpire_time_new){
+  
+$crw_hnt_opt=get_option( 'crwopt' );
+$crw_totalban_count=get_option( 'crw_totalban_count' );
+$crw_startban_time=get_option( 'crw_startban_time' );
+$crw_banexpire_time =get_option('crw_banexpire_time');
+
+   
+   if ($crw_hnt_opt==0) {
+    # code...
+
+    update_option('crwopt','1');
+    $crw_totalban_count=get_option( 'crw_totalban_count' );
+    $crw_startban_time=get_option( 'crw_startban_time' );
+    $crw_banexpire_time =get_option('crw_banexpire_time');
+   
+   }
+
+   else if($crw_hnt_opt==1 ){
+  
+
+  update_option('crw_totalban_count',$crw_totalban_count_new);
+  update_option('crw_startban_time',$crw_startban_time_new);
+  update_option('crw_banexpire_time',$crw_banexpire_time_new);
+  }
+} 
+
+function crw_unlimit_ip($crw_totalban_count_new,$crw_startban_time_new,$crw_banexpire_time_new){
+  
+$crw_hnt_opt=get_option( 'crwopt' );
+$crw_totalban_count=get_option( 'crw_totalban_count' );
+   
+   if ($crw_hnt_opt==1) {
+    # code...
+
+    update_option('crwopt','0');
+
+    
+    $crw_totalban_count=get_option( 'crw_totalban_count' );
+    $crw_startban_time=get_option( 'crw_startban_time' );
+   $crw_banexpire_time =get_option('crw_banexpire_time');
+
+
+   }
+
+  
+} 
+
 
 function crawler_insert_block_url($crw_browser_new){
 
@@ -238,6 +325,12 @@ function crawler_ip_check($get_crawler_ip_new){
 //check blocked status
 $crw_hnt_opt=get_option('crwopt');
 
+//get settings
+ $crw_totalban_count=get_option( 'crw_totalban_count' );
+    $crw_startban_time=get_option( 'crw_startban_time' );
+   $crw_banexpire_time =get_option('crw_banexpire_time');
+
+
 
 
 global $wpdb;
@@ -245,8 +338,8 @@ global $wpdb;
  
  $crw_banned_start_time=current_time( 'mysql' ); //first visit time 
 
-  $crw_banned_end_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + 60 ); //Added time after 1 minute
-  $crw_banned_total_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + 14400 ); //time blocked for 4 hours
+  $crw_banned_end_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + $crw_startban_time * 60 ); //Added time after 1 minute
+  $crw_banned_total_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + $crw_banexpire_time * 60 ); //time blocked for 4 hours
 
  //$crawler_ip_result = $wpdb->get_results($wpdb->prepare("SELECT * FROM wp_crawler_hunter_ip WHERE ip= '".$get_crawler_ip_new."'"));
     $crawler_ip_result = $wpdb->get_results(
@@ -295,7 +388,7 @@ $banned_total_time;
 
           
    $crw_banned_total_time1=$crw_banned_total_time;
-            if ($crw_i>=5 && $crw_banned_start_time <=$crw_banned_end_time ) {
+            if ($crw_i>=$crw_totalban_count && $crw_banned_start_time <=$crw_banned_end_time ) {
               # code...
                  //   header($_SERVER["SERVER_PROTOCOL"]." 403 Access Denied", true, 403);
                  header( 'HTTP/1.1 403 Forbidden' );
@@ -306,7 +399,7 @@ $banned_total_time;
     exit();
             }
       
-             if ($crw_i>=5 && $crw_banned_start_time >=$crw_banned_end_time && $crw_banned_start_time <= $crw_banned_total_time1 && $crw_list_status==1) {
+             if ($crw_i>=$crw_totalban_count && $crw_banned_start_time >=$crw_banned_end_time && $crw_banned_start_time <= $crw_banned_total_time1 && $crw_list_status==1) {
               # code...
 
             // header($_SERVER["SERVER_PROTOCOL"]." 403 Access Denied", true, 403);
@@ -321,11 +414,11 @@ $banned_total_time;
 
           
 
-           if ($crw_i>=5 && $crw_banned_start_time > $crw_banned_total_time1 && $crw_list_status==1 )
+           if ($crw_i>=$crw_totalban_count && $crw_banned_start_time > $crw_banned_total_time1 && $crw_list_status==1 )
             {
 
-                $crw_banned_end_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + 60 );
-                $crw_banned_total_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + 14400);
+                $crw_banned_end_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + $crw_startban_time * 60 );
+                $crw_banned_total_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + $crw_banexpire_time * 60);
 
          //14 400
 
@@ -335,11 +428,11 @@ $wpdb->update( $crw_table_name, array( 'total_access' =>'0' ,'banned_start_time'
       
 
 
-     if ($crw_i< 5 && $crw_banned_start_time > $crw_banned_end_time && $crw_list_status==1 )
+     if ($crw_i< $crw_totalban_count && $crw_banned_start_time > $crw_banned_end_time && $crw_list_status==1 )
             {
 
-                $crw_banned_end_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + 60 );
-                $crw_banned_total_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + 14400);
+                $crw_banned_end_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + $crw_startban_time * 60  );
+                $crw_banned_total_time=date( 'Y-m-d H:i:s', strtotime( $crw_banned_start_time ) + $crw_banexpire_time * 60 );
 
          //14 400
 

@@ -4,10 +4,10 @@ Plugin Name: crawler-hunter
 Tags: bad bots,block,ban,control bots,spiders,security
 Requires at least: 3.6
 Description:Bots and web crawlers coming to your site check the content of the Full user agent string and block the ones other than the white list.
-Tested up to: 6.2.2
+Tested up to: 6.8.1
 Requires PHP: 5.6
-Version: 1.1
-Stable tag: 1.1
+Version: 1.3
+Stable tag: 1.3
 License: GPL2
 **/
 require_once __DIR__ . '/crw_function.php';
